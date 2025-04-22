@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "role",
             "email",
+            "gender",
             "profile",
             "password",
             "username",
@@ -48,3 +49,14 @@ class UserSerializer(serializers.ModelSerializer):
             data["role"] = None  # Handle edge case where neither relationship exists
 
         return data
+
+
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        exclude = ["user"]
+        model = models.Client
+
+class RiderSerializer(serializers.ModelSerializer):
+    class Meta:
+        exclude = ["user"]
+        model = models.Rider

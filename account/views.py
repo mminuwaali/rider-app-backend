@@ -15,6 +15,13 @@ class VerifyTokenView(views.TokenVerifyView):
 class RefreshTokenView(views.TokenRefreshView):
     permission_classes = [permissions.AllowAny]
 
+class SettingsApiView(APIView):
+    def get_serializer(self, *args, **kwargs):
+        return serializers.ClientSerializer
+
+    def get_object(self,  *args, **kwargs):
+        return
+
 
 class SignupView(APIView):
     permission_classes = [permissions.AllowAny]

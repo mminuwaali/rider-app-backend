@@ -1,10 +1,10 @@
-# from . import models
+from . import models
 from django.core import mail
 
 # from django.urls import reverse
 from django.dispatch import receiver
 
-# from django.db.models import signals
+from django.db.models import signals
 from django.template.loader import render_to_string
 
 from django_rest_passwordreset import models
@@ -23,3 +23,15 @@ def password_reset_token_created(sender, instance, *args, **kwargs):
             {"user": user, "token": reset_password_token},
         ),
     )
+
+@receiver(signals.post_save, sender=models.User)
+def create_user_settings(sender, instance, created, *args, **kwargs):
+    if created:
+        try:
+            if instance.role == "rider":
+            models.Rider.object.create(user=user)
+
+            if instance.role == "client":
+                models.Client.object.create(user=user)
+        except Exception as e:
+            print("Failed to create user settings", e)
