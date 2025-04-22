@@ -32,20 +32,20 @@ DEBUG = env.bool("DEBUG", False)
 
 AUTH_USER_MODEL = "account.user"
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 # cors config
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
-CORS_ALLOWED_ORIGINS = env.list(
-    "CORS_ALLOWED_ORIGINS", default=[] if DEBUG else env.NOTSET
-)
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # "daphne",
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -53,8 +53,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # 3rd party apps
+    # "channels",
+    'cloudinary',
     "corsheaders",
     "rest_framework",
+    'cloudinary_storage',
     "rest_framework_simplejwt",
     "django_rest_passwordreset",
     # my own apps
@@ -67,6 +70,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -93,6 +97,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = "backend.asgi.application"
 WSGI_APPLICATION = "backend.wsgi.application"
 
 
@@ -140,9 +145,15 @@ MEDIA_URL = "media/"
 
 STATIC_URL = "static/"
 
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / "_rider/media"
 
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "_rider/static"
+
+if not DEBUG:
+
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -186,6 +197,26 @@ EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "AUTH_TOKEN_CLASSES": ["rest_framework_simplejwt.tokens.AccessToken"],
+}
+
+# channels config
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        # "BACKEND": "channels_redis.core.RedisChannelLayer",
+        # "CONFIG": {
+        #     "hosts": [("127.0.0.1", 6379)],
+        # },
+    },
+}
+
+# cloudinary config
+
+CLOUDINARY_STORAGE = {
+    'API_KEY': env.str('API_KEY'),
+    'API_SECRET': env.str('API_SECRET'),
+    'CLOUD_NAME': env.str('CLOUD_NAME'),
 }
