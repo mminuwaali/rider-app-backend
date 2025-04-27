@@ -106,7 +106,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {"default": config(default="sqlite:///db.sqlite3", conn_max_age=600, engine="django.contrib.gis.db.backends.spatialite")}
+DATABASES = {"default": config(default="sqlite:///db.sqlite3", conn_max_age=600)}
 
 
 # Password validation
@@ -207,11 +207,11 @@ SIMPLE_JWT = {
 
 CHANNEL_LAYERS = {
     'default': {
-        # 'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        # "BACKEND": "channels_redis.core.RedisChannelLayer",
+        # "CONFIG": {
+        #     "hosts": [("127.0.0.1", 6379)],
+        # },
     },
 }
 
