@@ -24,6 +24,7 @@ class Rider(models.Model):
         ('packages', 'p'),
     ]
 
+    capacity = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.OneToOneField(User, models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)

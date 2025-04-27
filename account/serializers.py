@@ -1,5 +1,32 @@
 from . import models
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
+from django.contrib.auth import password_validation
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate_old_password(self, value):
+        # Check if the old password is correct
+        user = self.context.get('user')
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is incorrect.")
+        return value
+
+    def validate(self, data):
+        # Ensure that new_password and confirm_password match
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("New password and confirm password do not match.")
+        
+        # Validate new password strength
+        try:
+            password_validation.validate_password(data['new_password'], self.context.get('user'))
+        except ValidationError as e:
+            raise serializers.ValidationError({'new_password': e.messages})
+        
+        return data
 
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(write_only=True, required=True)  # Role is required for input
@@ -51,12 +78,17 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
 
+    
 class ClientSerializer(serializers.ModelSerializer):
+    # user = serializers.PrimaryKeySerializer(write_only=True)
+    
     class Meta:
         exclude = ["user"]
         model = models.Client
 
 class RiderSerializer(serializers.ModelSerializer):
+    # user = serializers.PrimaryKeySerializer(write_only=True)
+
     class Meta:
         exclude = ["user"]
         model = models.Rider
