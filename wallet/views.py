@@ -1,12 +1,35 @@
+from django.db.models import Sum, F
 from . import utils, models, serializers
-from rest_framework import views, status, viewsets, response
+from django.db.models.functions import ExtractMonth, ExtractYear
+from rest_framework import views, status, viewsets, response, decorators, permissions
 
 class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    filterset_fields = ['created_at__year']
+
     def get_serializer_class(self):
         return serializers.TransactionSerializer
 
     def get_queryset(self):
+        return models.Transaction.objects.all()
         return models.Transaction.objects.filter(wallet__user=self.request.user)
+
+    @decorators.action(["GET"], False, "transaction-stats")
+    def aggregate_by_month(self, request, *args, **kwargs):
+        # Filter transactions for the current user
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Aggregate transactions by year and month
+        aggregated_data = (
+            queryset.annotate(
+                year=ExtractYear("created_at"),
+                month=ExtractMonth("created_at"),
+            )
+            .values("year", "month")
+            .annotate(total_amount=Sum("amount"))
+            .order_by("year", "month")  # Optional: Order by latest year and month
+        )
+
+        return response.Response(aggregated_data)
 
 class WalletAPIView(views.APIView):
     def get(self, request, *args, **kwargs):
@@ -45,6 +68,7 @@ class VerifyTransactionAPIView(views.APIView):
         # Check if the user has a wallet
         try:
             wallet = models.Wallet.objects.get(user=request.user)
+            wallet.deposit
         except models.Wallet.DoesNotExist:
             return response.Response(
                 {"error": "Wallet not found."},
