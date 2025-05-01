@@ -6,7 +6,8 @@ router = DefaultRouter()
 router.register("transaction", views.TransactionViewSet, "transaction")
 
 urlpatterns = [
-    path("verify/<str:refrence>/", views.VerifyTransactionAPIView.as_view(), name="verify"),
+    path("initialize-payment/", views.InitializePaymentAPIView.as_view(), name="initialize-payment"),
+    path("verify/", views.VerifyTransactionAPIView.as_view(), name="verify"),
     path("withdraw/", views.WithdrawAPIView.as_view(), name="withdraw"),
     path("", views.WalletAPIView.as_view(), name="wallet"),
     path("", include(router.urls)),

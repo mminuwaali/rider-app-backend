@@ -61,6 +61,9 @@ class Transaction(models.Model):
     reference = models.CharField(max_length=200, default="", blank=True)
     amount = models.DecimalField(default=0, decimal_places=2, max_digits=10)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return f"{self.wallet.user.username}: {self.type.name} transaction of {self.amount}"
 
