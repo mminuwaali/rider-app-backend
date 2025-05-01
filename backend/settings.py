@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "channels",
     'cloudinary',
     "corsheaders",
+    "django_filters",
     "rest_framework",
     'cloudinary_storage',
     "rest_framework_simplejwt",
@@ -171,7 +172,11 @@ REST_FRAMEWORK = {
         "rest_framework.pagination.PageNumberPagination"
     ),
 
-    "DEFAULT_FILTER_BACKENDS": [],
+    "DEFAULT_FILTER_BACKENDS": [
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
     
     "DEFAULT_PERMISSION_CLASSES": [
         # "rest_framework.permissions.IsAuthenticated",
@@ -222,3 +227,9 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': env.str('API_SECRET'),
     'CLOUD_NAME': env.str('CLOUD_NAME'),
 }
+
+
+# paystack 
+PAYSTACK_PUBLIC_KEY = env.str("PAYSTACK_PUBLIC_KEY")
+
+PAYSTACK_SECRET_KEY = env.str("PAYSTACK_SECRET_KEY")
