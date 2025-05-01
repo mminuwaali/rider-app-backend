@@ -11,6 +11,7 @@ class Schedule(models.Model):
     start_time = models.TimeField()
     scheduled_date = models.DateField()
     routes = models.JSONField(default=list)
+    is_started = models.BooleanField(default=False)
     rider = models.ForeignKey(User, models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
     capacity = models.PositiveIntegerField(default=0)
@@ -28,7 +29,7 @@ class Schedule(models.Model):
 
 
     class Meta:
-        ordering = ["scheduled_date", "start_time"]
+        ordering = ["-scheduled_date"]
         unique_together = ["rider","start_time", "scheduled_date"]
 
     def __str__(self):
@@ -43,17 +44,20 @@ class Booking(models.Model):
         ("completed", "Completed"),
     ]
 
+
+    origin = models.JSONField(default=dict)
     capacity = models.IntegerField(default=0)
+    destination = models.JSONField(default=dict)
     client = models.ForeignKey(User, models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     schedule = models.ForeignKey(Schedule, models.CASCADE)
+    rider = models.ForeignKey(User, models.CASCADE, related_name="ride_bookings")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     ride_request = models.OneToOneField("Request", models.CASCADE, null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
-
 
     def calculate_final_price(self):
         """Calculate the final charge for the client."""
@@ -80,6 +84,7 @@ class Request(models.Model):
     destination = models.JSONField() 
     client = models.ForeignKey(User, models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
+    capacity = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     rider = models.ForeignKey(User, models.CASCADE, related_name="ride_requests")
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -99,4 +104,14 @@ class Request(models.Model):
 
 
     def __str__(self):
-        return f"RideRequest by {self.client} from {self.origin['address']} to {self.destination['address']}"
+        return f"RideRequest by {self.client} from to "
+
+
+class RiderLocation(models.Model):
+    latitude = models.FloatField(default=0)
+    longitude = models.FloatField(default=0)
+    is_online = models.BooleanField(default=False)
+    rider = models.OneToOneField(User, models.CASCADE, related_name="rider_location")
+
+    def __str__(self):
+        return f"{self.rider.username} - {'Online' if self.is_online else 'Offline'}"

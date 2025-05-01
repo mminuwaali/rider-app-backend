@@ -1,6 +1,8 @@
 from . import models
 from django.contrib import admin
 
+@admin.register(models.RiderLocation)
+class RiderLocationAdmin(admin.ModelAdmin): ...
 
 @admin.register(models.Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
