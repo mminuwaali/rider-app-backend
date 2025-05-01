@@ -87,8 +87,17 @@ class ClientSerializer(serializers.ModelSerializer):
         model = models.Client
 
 class RiderSerializer(serializers.ModelSerializer):
-    # user = serializers.PrimaryKeySerializer(write_only=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
-        exclude = ["user"]
+        fields = "__all__"
         model = models.Rider
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        exclude = ['user']
+        model = models.Address
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context.get("user")
+        return models.Address.objects.create(**validated_data)

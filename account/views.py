@@ -1,8 +1,11 @@
+from django.db.models import F
 from . import models, serializers
 from rest_framework.views import APIView
+from rideapp.models import RiderLocation
 from rest_framework_simplejwt import views
+from rideapp.utils import calculate_distance
 from django.contrib.auth import update_session_auth_hash
-from rest_framework import status, viewsets, response, permissions
+from rest_framework import status, viewsets, response, permissions, decorators
 
 
 class SigninView(views.TokenObtainPairView):
@@ -16,9 +19,52 @@ class VerifyTokenView(views.TokenVerifyView):
 class RefreshTokenView(views.TokenRefreshView):
     permission_classes = [permissions.AllowAny]
 
+class AddressView(APIView):
+    def get_serializer(self, *args, **kwargs):
+        return serializers.AddressSerializer(*args, **kwargs)
+
+    def get_queryset(self):
+        return self.request.user.address_set.all()
+
+    def get(self, request):
+        queryset = self.get_queryset()
+
+        serializer = serializers.AddressSerializer(queryset, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        user = request.user
+
+        serializer = self.get_serializer(data=request.data, context={"user":user})
+        if serializer.is_valid():
+            serializer.save()
+
+            return response.Response(serializer.data, status=status.HTTP_200_OK)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def patch(self, request):
+    #     user = request.user
+
+    #     serializer = self.get_serializer(data=request.data, context={"user":user}, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+
+    #         return response.Response(serializer.data, status=status.HTTP_200_OK)
+    #     return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def patch(self, request):
+    #     user = request.user
+
+    #     serializer = self.get_serializer(user, data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+
+    #         return response.Response(serializer.data, status=status.HTTP_200_OK)
+    #     return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class SettingsApiView(APIView):
     def get_serializer(self, *args, **kwargs):
-        return serializers.ClientSerializer
+        return serializers.ClientSerializer(*args, **kwargs)
 
     def get_object(self,  *args, **kwargs):
         return

@@ -19,9 +19,9 @@ class User(AbstractUser):
 
 class Rider(models.Model):
     SERVICE_CHOICES = [
-        ('both', 'b'),
-        ('rides', 'r'),
-        ('packages', 'p'),
+        ('both', 'both'),
+        ('rides', 'rides'),
+        ('packages', 'packages'),
     ]
 
     capacity = models.IntegerField(default=0)
@@ -36,3 +36,14 @@ class Client(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     user = models.OneToOneField(User, models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Address(models.Model):
+    name = models.CharField(max_length=255)
+    coordinates = models.JSONField(default=dict)
+    user = models.ForeignKey(User, models.CASCADE)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user}'s {self.name} address"
